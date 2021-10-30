@@ -8,33 +8,55 @@ import { AppUi } from "./AppUI";
 //   { text: 'tomar el curso de react', completed: false },
 //   { text: 'Lorar con la llorona', completed: false },
 // ]
+
 function useLocalStorage(itemName, initialValue) {
-  const localStorageItem = localStorage.getItem(itemName)
-  let parsedItem
+  const [ loading, setLoading ] = React.useState(true)
+  const [ error, setError ] = React.useState(false)
+  // window.localStorage.removeItem(itemName)
+  const [ item, setItem ] = React.useState(initialValue)
 
-  if (!localStorageItem) {
-    localStorage.setItem(itemName, JSON.stringify(initialValue))
-    parsedItem = initialValue
-  } else {
-    parsedItem = JSON.parse(localStorageItem)
-  }
+  React.useEffect( () => {
+    try {
+        setTimeout( () => {
+          const localStorageItem = localStorage.getItem(itemName)
+          let parsedItem
+          
+          if (!localStorageItem) {
+            localStorage.setItem(itemName, JSON.stringify(initialValue))
+            parsedItem = initialValue
+          } else {
+            parsedItem = JSON.parse(localStorageItem)
+          }
+          setItem(parsedItem)
+          setLoading(false)
+        },  1000)
+      } catch (err) {
+        setError(err)
+      }
+  }, [itemName, initialValue])
 
-  const [ item, setItem ] = React.useState(parsedItem)
 
   const saveItem = (newItem) => {
-    const stringifiedItem = JSON.stringify(newItem)
-    localStorage.setItem(itemName, stringifiedItem)
-    setItem(newItem)
+    try {
+      const stringifiedItem = JSON.stringify(newItem)
+      localStorage.setItem(itemName, stringifiedItem)
+      setItem(newItem)
+    } catch (err) {
+      setError(err)
+    }
     }
 
-  return [ 
+  return {
     item, 
-    saveItem, 
-  ]
+    saveItem,
+    loading,
+    error 
+  }
+  
 }
 
 function App() {
-  const [todos, saveTodos ] = useLocalStorage('TODOS_V1', [])
+  const { item: todos, saveItem: saveTodos, loading, error } = useLocalStorage('TODOS_V1', [])
 
   const [ searchValue, setSearchValue ] = React.useState('')
 
@@ -53,8 +75,6 @@ function App() {
     })
   }
 
-
-
   const completeTodo = (text) => {
     const todoIndex = todos.findIndex(todo => todo.text === text)
     const newTodos = [...todos]
@@ -69,8 +89,18 @@ function App() {
     saveTodos(newTodos)
   }
 
+  // console.log('Render antes del useEffect')
+
+  // React.useEffect(() => {
+  //   console.log('useEffect')
+  // }, [totalTodos])
+
+  // console.log('Render DESPUES del useEffect')
+
   return (
-    <AppUi 
+    <AppUi
+      loading={loading}
+      error={error} 
       totalTodos={totalTodos}
       completedTodos={completedTodos}
       searchValue={searchValue}
