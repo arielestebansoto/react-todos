@@ -32,28 +32,48 @@ function App() {
         <TodoCounter 
             totalTodos={totalTodos}
             completedTodos={completedTodos}
+            loading={loading}
         />
         <TodoSearch 
             searchValue={searchValue}
             setSearchValue={setSearchValue}
+            loading={loading}
         />
     </TodoHeader>
     
-    <TodoList>
-        { error && <p>CSM</p> }
-        { loading && <p>Loading...</p> }
-        {(!loading && !searchedTodos.length) && <p>Crea tu primer todo</p>}
-        
+    <TodoList
+        totalTodos={totalTodos}
+        error={error}
+        loading={loading} 
+        searchedTodos={searchedTodos}
+        searchText={searchValue}
+        onError={() => <p>Error...</p>}
+        onLoading={() => <p>Loading...</p>}
+        onEmptyTodos={() => <p>Empty Todos</p>}
+        onEmptySearchResults={
+            (searchText) => <p>No hay resultados para: {searchText}, pa!</p>}
+        // render={
+        //     todo => (
+        //         <TodoItem 
+        //             key={todo.text} 
+        //             text={todo.text} 
+        //             completed={todo.completed}
+        //             onComplete={() => completeTodo(todo.text)}
+        //             onDelete={() => deleteTodo(todo.text)}
+        //         />
+        //     )
+        // }
+    >
         {
-        searchedTodos.map( todo => (
-            <TodoItem 
-            key={todo.text} 
-            text={todo.text} 
-            completed={todo.completed}
-            onComplete={() => completeTodo(todo.text)}
-            onDelete={() => deleteTodo(todo.text)}
-            />
-        ))
+            todo => (
+                <TodoItem 
+                    key={todo.text} 
+                    text={todo.text} 
+                    completed={todo.completed}
+                    onComplete={() => completeTodo(todo.text)}
+                    onDelete={() => deleteTodo(todo.text)}
+                />
+            )
         }
     </TodoList>
     {
