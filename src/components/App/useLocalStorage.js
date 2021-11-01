@@ -1,30 +1,31 @@
 import React from 'react'
 
 export function useLocalStorage(itemName, initialValue) {
+    const [ sincronizedItem, setSincronizedItem ] = React.useState(false)
     const [ loading, setLoading ] = React.useState(true)
     const [ error, setError ] = React.useState(false)
-    // window.localStorage.removeItem(itemName)
     const [ item, setItem ] = React.useState(initialValue)
   
     React.useEffect( () => {
-      try {
-          setTimeout( () => {
-            const localStorageItem = localStorage.getItem(itemName)
-            let parsedItem
-            
-            if (!localStorageItem) {
-              localStorage.setItem(itemName, JSON.stringify(initialValue))
-              parsedItem = initialValue
-            } else {
-              parsedItem = JSON.parse(localStorageItem)
+      setTimeout( () => {
+        try {
+              const localStorageItem = localStorage.getItem(itemName)
+              let parsedItem
+              
+              if (!localStorageItem) {
+                localStorage.setItem(itemName, JSON.stringify(initialValue))
+                parsedItem = initialValue
+              } else {
+                parsedItem = JSON.parse(localStorageItem)
+              }
+              setItem(parsedItem)
+              setLoading(false)
+              setSincronizedItem(true)
+            } catch (err) {
+              setError(err)
             }
-            setItem(parsedItem)
-            setLoading(false)
-          },  1000)
-        } catch (err) {
-          setError(err)
-        }
-    }, [itemName, initialValue])
+        },  1000)
+    }, [sincronizedItem])
   
   
     const saveItem = (newItem) => {
@@ -37,10 +38,15 @@ export function useLocalStorage(itemName, initialValue) {
       }
       }
   
+    const sincronizeItem = () => {
+      setLoading(true)
+      setSincronizedItem(false)
+    }
     return {
       item, 
       saveItem,
       loading,
-      error 
+      error,
+      sincronizeItem, 
     }
   }
